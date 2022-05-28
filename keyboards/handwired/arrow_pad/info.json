@@ -2,6 +2,8 @@
   "keyboard_name": "arrow_pad",
   "url": "",
   "maintainer": "qmk",
+  "width": 4,
+  "height": 6,
   "layouts": {
     "LAYOUT": {
       "layout": [
