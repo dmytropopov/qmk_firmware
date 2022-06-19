@@ -9,8 +9,8 @@ enum my_keycodes {
 
 #define MATRIX_ENCODERS_COUNT 2
 
-const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_VOLU, KC_F1 };
-const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_VOLD, KC_F2 };
+const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_UP, KC_F1 };
+const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_DOWN, KC_F2 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT(
@@ -60,7 +60,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           padAStates[0] = true;
         }
       } else {
-          padAStates[0] = false;
+        if (padAStates[0] == true)
+        {
+          if (padBStates[0])
+            tap_code(MATRIX_ENCODERS_CCW_KEYCODES[0]);
+          else 
+            tap_code(MATRIX_ENCODERS_CW_KEYCODES[0]);
+
+          padAStates[0] = true;
+        }
+        padAStates[0] = false;
       }
       return false; 
     case KC_E1M2:
