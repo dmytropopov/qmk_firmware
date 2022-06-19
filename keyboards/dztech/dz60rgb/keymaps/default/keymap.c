@@ -43,8 +43,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
-bool padAStates[MATRIX_ENCODERS_COUNT];
-bool padBStates[MATRIX_ENCODERS_COUNT];
+static bool padAStates[MATRIX_ENCODERS_COUNT];
+static bool padBStates[MATRIX_ENCODERS_COUNT];
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
@@ -67,9 +67,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
           else 
             tap_code(MATRIX_ENCODERS_CW_KEYCODES[0]);
 
-          padAStates[0] = true;
+          padAStates[0] = false;
         }
-        padAStates[0] = false;
       }
       return false; 
     case KC_E1M2:
