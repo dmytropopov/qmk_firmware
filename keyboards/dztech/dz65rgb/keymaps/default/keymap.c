@@ -1,5 +1,10 @@
 #include QMK_KEYBOARD_H
 
+//#define ENCODERS_PAD_A { B0 }
+//#define ENCODERS_PAD_B { B1 }
+//
+//#include "encoder.c"
+
 enum my_keycodes {
   KC_E1M1 = SAFE_RANGE,
   KC_E1M2,
@@ -32,7 +37,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static bool padAStates[MATRIX_ENCODERS_COUNT];
 static bool padBStates[MATRIX_ENCODERS_COUNT];
 
-#define MATRIX_ENCODERS_DELAY 10
+#define MATRIX_ENCODERS_DELAY 50
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
@@ -41,35 +46,51 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if (padAStates[0] == false)
         {
           if (padBStates[0])
-            tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CCW direction, this gives no false positives
+            ;//tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CCW direction, this gives no false positives
           else 
             tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
 
           padAStates[0] = true;
         }
       } else {
-        if (padAStates[0] == true)
-        {
-          if (padBStates[0])
-            ;//tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
-          else 
-            ;//tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
-
+//        if (padAStates[0] == true)
+//        {
+//          if (padBStates[0])
+//            ;//tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
+//          else 
+//            ;//tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
+//
+//          padAStates[0] = false;
+//        }
           padAStates[0] = false;
-        }
       }
       return false; 
     case KC_E1M2:
       if (record->event.pressed) {
+        if (padBStates[0] == false)
+        {
+          if (padAStates[0])
+            ;//tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CCW direction, this gives no false positives
+          else 
+            tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
+
           padBStates[0] = true;
+        }
+//        padBStates[0] = true;
       } else {
-          padBStates[0] = false;
+        padBStates[0] = false;
       }
       return false;
     default:
       return true; 
   }
 }
+
+//void keyboard_post_init_user(void) {
+//    for (int i = 0; i < NUMBER_OF_ENCODERS; i++) {
+//        encoder_state[i] = (readPin(encoders_pad_a[i]) << 0) | (readPin(encoders_pad_b[i]) << 1);
+//    }
+//}
 
 //bool encoder_update_user(uint8_t index, bool clockwise) {
 //    if (index == 0) { /* First encoder */
