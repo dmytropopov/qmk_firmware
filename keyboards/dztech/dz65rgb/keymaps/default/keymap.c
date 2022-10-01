@@ -1,9 +1,19 @@
 #include QMK_KEYBOARD_H
 
-//#define ENCODERS_PAD_A { B0 }
-//#define ENCODERS_PAD_B { B1 }
-//
-//#include "encoder.c"
+#define ENCODERS_PAD_A { B0 }
+#define ENCODERS_PAD_B { B1 }
+
+#define MATRIX_ENCODERS_DELAY 50
+
+#define MATRIX_ENCODERS_COUNT 2
+
+const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_A, KC_F1 };
+const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_B, KC_F2 };
+
+//#define encoder_update_user encoder_update_user2
+
+//#include "encoder.h"
+#include "encoder.c"
 
 enum my_keycodes {
   KC_E1M1 = SAFE_RANGE,
@@ -11,11 +21,6 @@ enum my_keycodes {
   KC_E2M1,
   KC_E2M2
 };
-
-#define MATRIX_ENCODERS_COUNT 2
-
-const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_UP, KC_F1 };
-const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_DOWN, KC_F2 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_65_ansi(
@@ -34,11 +39,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     )
 };
 
-static bool padAStates[MATRIX_ENCODERS_COUNT];
-static bool padBStates[MATRIX_ENCODERS_COUNT];
+static uint8_t padAStates[MATRIX_ENCODERS_COUNT];
+static uint8_t padBStates[MATRIX_ENCODERS_COUNT];
 
-#define MATRIX_ENCODERS_DELAY 50
 
+
+
+/*
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case KC_E1M1:
@@ -85,21 +92,83 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       return true; 
   }
 }
-
-//void keyboard_post_init_user(void) {
+*/
+void keyboard_post_init_user(void) {
 //    for (int i = 0; i < NUMBER_OF_ENCODERS; i++) {
 //        encoder_state[i] = (readPin(encoders_pad_a[i]) << 0) | (readPin(encoders_pad_b[i]) << 1);
 //    }
-//}
+}
 
-//bool encoder_update_user(uint8_t index, bool clockwise) {
-//    if (index == 0) { /* First encoder */
-//        if (clockwise) {
-//            tap_code(KC_VOLU);
-//        } else {
-//            tap_code(KC_VOLD);
-//        }
-//    }
-//    return false;
-//}
-//
+bool encoder_update_user2(uint8_t index, bool clockwise) {
+    if (index == 0) { /* First encoder */
+        if (clockwise) {
+            tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
+        } else {
+            tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
+        }
+    }
+    return false;
+}
+
+bool encoder_update2(uint8_t index, uint8_t state) {
+    bool    changed = false;
+    uint8_t i       = index;
+
+    uint8_t resolution = ENCODER_RESOLUTION;
+
+    encoder_pulses[i] += encoder_LUT[state & 0xF];
+    if (encoder_pulses[i] >= resolution) {
+        encoder_value[index]++;
+        changed = true;
+        encoder_update_user2(index, ENCODER_COUNTER_CLOCKWISE);
+    }
+    if (encoder_pulses[i] <= -resolution) { // direction is arbitrary here, but this clockwise
+        encoder_value[index]--;
+        changed = true;
+        encoder_update_user2(index, ENCODER_CLOCKWISE);
+    }
+    encoder_pulses[i] %= resolution;
+    return changed;
+}
+
+void update_encoders(void) {
+    bool changed = false;
+
+    const int i = 0;
+    //for (uint8_t i = 0; i < NUMBER_OF_ENCODERS; i++) {
+        encoder_state[i] <<= 2;
+        encoder_state[i] |= (padAStates[0] << 0) | (padBStates[0] << 1);
+        changed |= encoder_update2(i, encoder_state[i]);
+
+        if (changed) {
+
+        }
+    //}
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  switch (keycode) {
+    case KC_E1M1:
+      if (record->event.pressed) {
+          padAStates[0] = 1;
+      } else {
+          padAStates[0] = 0;
+      }
+
+        update_encoders();
+
+        return false; 
+    case KC_E1M2:
+      if (record->event.pressed) {
+          padBStates[0] = 1;
+      } else {
+          padBStates[0] = 0;
+      }
+
+        update_encoders();
+
+      return false;
+    default:
+      return true; 
+  }
+}

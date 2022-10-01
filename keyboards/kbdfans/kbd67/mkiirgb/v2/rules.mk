@@ -19,4 +19,6 @@ RGB_MATRIX_ENABLE = yes     # Use RGB matrix
 RGB_MATRIX_DRIVER = IS31FL3731
 NO_USB_STARTUP_CHECK = no          # Disable initialization only when usb is plugged in
 
+DEBOUNCE_TYPE = sym_eager_pr
+
 LAYOUTS = 65_ansi_blocker
