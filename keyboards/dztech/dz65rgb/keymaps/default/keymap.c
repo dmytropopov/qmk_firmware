@@ -9,8 +9,8 @@ enum my_keycodes {
 
 #define MATRIX_ENCODERS_COUNT 2
 
-const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_UP, KC_F1 };
-const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_DOWN, KC_F2 };
+const uint16_t MATRIX_ENCODERS_CW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_A, KC_F1 };
+const uint16_t MATRIX_ENCODERS_CCW_KEYCODES[MATRIX_ENCODERS_COUNT] = { KC_B, KC_F2 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [0] = LAYOUT_65_ansi(
@@ -32,38 +32,67 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 static bool padAStates[MATRIX_ENCODERS_COUNT];
 static bool padBStates[MATRIX_ENCODERS_COUNT];
 
+static bool awaitingCCW = false;
+static bool awaitingCW = false;
+static bool awaitingCCW_B = false;
+static bool awaitingCW_B = false;
+
 #define MATRIX_ENCODERS_DELAY 10
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   switch (keycode) {
     case KC_E1M1:
       if (record->event.pressed) {
-        if (padAStates[0] == false)
-        {
+        // Using A pad signal as main - keypresses will be simulated based on its fronts
+        // B pad signal is auxiliary - it helps to find direction and errors
+        if (padAStates[0] == false) { // A Front
           if (padBStates[0])
-            tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CCW direction, this gives no false positives
-          else 
-            tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
+            { awaitingCCW = true; awaitingCW = false; } //tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CCW direction, this gives no false positives
+          else
+            { awaitingCW = true; awaitingCCW = false; } //tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY); // when rotating in CW direction, this gives a little of false positives
 
           padAStates[0] = true;
+        } else { // A invalid Front - Front after Front
+          awaitingCCW = awaitingCW = awaitingCCW_B = awaitingCW_B = false;
         }
       } else {
-        if (padAStates[0] == true)
-        {
-          if (padBStates[0])
-            ;//tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
-          else 
-            ;//tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
-
+        if (padAStates[0] == true) { // A Back
+          if (padBStates[0]) {
+            if (awaitingCW && awaitingCW_B) {
+              tap_code_delay(MATRIX_ENCODERS_CW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
+            }
+          } else {
+            if (awaitingCCW && awaitingCCW_B) {
+              tap_code_delay(MATRIX_ENCODERS_CCW_KEYCODES[0], MATRIX_ENCODERS_DELAY);
+            }
+          }
           padAStates[0] = false;
+
+          awaitingCCW = awaitingCW = awaitingCCW_B = awaitingCW_B = false;
+        } else { // A invalid Back - Back after Back
         }
+        awaitingCCW = awaitingCW = awaitingCCW_B = awaitingCW_B = false;
       }
       return false; 
     case KC_E1M2:
       if (record->event.pressed) {
-          padBStates[0] = true;
+          if (padBStates[0] == false) { // B Front
+            if (awaitingCW)
+                awaitingCW_B = true;
+            else
+                awaitingCCW = awaitingCW = awaitingCCW_B = awaitingCW_B = false;
+
+            padBStates[0] = true;
+          }
       } else {
-          padBStates[0] = false;
+          if (padBStates[0] == true) { // B Back
+            if (awaitingCCW)
+                awaitingCCW_B = true;
+            else
+                awaitingCCW = awaitingCW = awaitingCCW_B = awaitingCW_B = false;
+
+            padBStates[0] = false;
+          }
       }
       return false;
     default:
