@@ -20,7 +20,3 @@ AUDIO_ENABLE = no              # Audio output
 RGB_MATRIX_ENABLE = yes        # Use RGB matrix
 RGB_MATRIX_DRIVER = IS31FL3741
 LTO_ENABLE = yes
-
-DEBOUNCE_TYPE = sym_eager_pk
-
-# ENCODER_ENABLE = yes
