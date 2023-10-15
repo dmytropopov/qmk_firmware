@@ -1,0 +1,39 @@
+{
+    "keyboard_name": "ext_knobs",
+    "manufacturer": "Dmytro Popov",
+    "url": "",
+    "maintainer": "Dmytro Popov",
+    "processor": "RP2040",
+    "bootloader": "rp2040",
+    "encoder": {
+        "enabled": true,
+        "rotary": [
+            {
+                "pin_a": "GP28",
+                "pin_b": "GP29",
+                "resolution": 2
+            }
+        ]
+    },
+    "matrix_pins": {
+        "direct": [
+            [ "GP26" ]
+        ]
+    },
+    "layouts": {
+        "LAYOUT_k1": {
+            "layout": [
+                {
+                    "x": 0,
+                    "y": 0,
+                    "matrix": [ 0, 0 ]
+                }
+            ]
+        }
+    },
+    "usb": {
+        "device_version": "1.0.0",
+        "pid": "0xDADA",
+        "vid": "0xFEED"
+    }
+}
