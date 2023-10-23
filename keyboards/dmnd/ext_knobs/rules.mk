@@ -1,4 +1,4 @@
-CONSOLE_ENABLE = no            # Console for debug
-COMMAND_ENABLE = no            # Commands for debug and configuration
+#CONSOLE_ENABLE = no            # Console for debug
+#COMMAND_ENABLE = no            # Commands for debug and configuration
 
-ENCODER_ENABLE = yes
+#ENCODER_ENABLE = yes

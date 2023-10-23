@@ -5,21 +5,32 @@
     "maintainer": "Dmytro Popov",
     "processor": "RP2040",
     "bootloader": "rp2040",
+    "diode_direction": "COL2ROW",
+    "matrix_pins": {
+        "cols": [ "GP26" ],
+        "rows": [ "GP27" ]
+    },
+    "features": {
+        "bootmagic": true,
+        "command": false,
+        "console": false,
+        "extrakey": true
+    },
     "encoder": {
         "enabled": true,
         "rotary": [
             {
                 "pin_a": "GP28",
                 "pin_b": "GP29",
-                "resolution": 2
+                "resolution": 4
             }
         ]
     },
-    "matrix_pins": {
-        "direct": [
-            [ "GP26" ]
-        ]
-    },
+    //"matrix_pins": {
+    //    "direct": [
+    //        [ "GP26" ]
+    //    ]
+    //},
     "layouts": {
         "LAYOUT_k1": {
             "layout": [
